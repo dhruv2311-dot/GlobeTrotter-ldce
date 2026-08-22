@@ -84,3 +84,19 @@ export interface DatabaseHealthStatus {
   latencyMs?: number;
   error?: string;
 }
+
+// ─── Express Request Augmentation ─────────────────────────────────────────────
+
+import { Request } from 'express';
+import { Role } from '@prisma/client';
+
+export interface UserPayload {
+  id: number;
+  email: string;
+  role: Role;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: UserPayload;
+}
+

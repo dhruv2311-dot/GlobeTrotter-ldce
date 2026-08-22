@@ -57,6 +57,11 @@ const config = {
     windowMs: optionalEnvNumber('RATE_LIMIT_WINDOW_MS', 15 * 60 * 1000), // 15 min
     max: optionalEnvNumber('RATE_LIMIT_MAX', 100),
   },
+
+  jwt: {
+    secret: optionalEnv('JWT_SECRET', 'default-globetrotter-super-secret-jwt-key'),
+    expiresIn: optionalEnv('JWT_EXPIRES_IN', '7d'),
+  },
 } as const;
 
 export default config;

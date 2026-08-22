@@ -293,9 +293,9 @@ server/
 
 ## Current Sprint
 
-**Sprint 1 — Backend Foundation** ✅
+**Sprint 2 — Authentication, Users & Travel Data** ✅
 
-Establishes the project architecture, PostgreSQL connection, environment configuration, error handling, validation framework, and health-check endpoints.
+Builds on the backend foundation with JWT authentication, role-based access, user management, and read APIs for countries, cities, and activities.
 
 **What is implemented:**
 - TypeScript + Express project scaffolding
@@ -311,11 +311,12 @@ Establishes the project architecture, PostgreSQL connection, environment configu
 - Rate limiting, CORS, Helmet, Compression
 - Graceful shutdown (SIGTERM/SIGINT)
 - Jest + Supertest test foundation
+- JWT authentication and role-based access control
+- User registration, login, profile, and management endpoints
+- Country, city, and activity read endpoints with filtering and pagination
+- Prisma seed data for Sprint 2 entities
 
 **What is NOT implemented (future sprints):**
-- Authentication / JWT
-- Users / roles
-- Cities / countries / activities
 - Trips / stops / itinerary
 - Budget / expenses
 - Calendar / timeline
@@ -330,7 +331,7 @@ Establishes the project architecture, PostgreSQL connection, environment configu
 | Sprint | Focus |
 |---|---|
 | ✅ 1 | Backend Foundation |
-| 2 | Authentication & Users |
+| ✅ 2 | Authentication, Users & Travel Data |
 | 3 | Countries, Cities & Activities |
 | 4 | Trip Management |
 | 5 | Multi-City Stops |

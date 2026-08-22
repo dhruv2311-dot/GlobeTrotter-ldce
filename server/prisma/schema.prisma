@@ -1,10 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // GlobeTrotter — Prisma Schema
-// Sprint 1: Foundation Only
-//
-// This file contains the minimal schema needed to bootstrap the application.
-// Domain entities (users, trips, cities, activities, etc.) will be added in
-// their respective sprints via incremental migrations.
+// Sprint 2: Authentication, User Management, Cities & Activities
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
@@ -16,31 +12,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Sprint 1: Minimal foundation model.
-//
-// A SystemConfig table is used as a lightweight anchor so Prisma can generate
-// a client and verify database connectivity without introducing any domain
-// models prematurely.
-//
-// Domain tables will be added in future sprints:
-//
-// Sprint 2:  users, roles, user_preferences, password_reset_tokens, refresh_tokens
-// Sprint 3:  countries, cities, activities
-// Sprint 4:  trips, trip_shares
-// Sprint 5:  trip_stops
-// Sprint 6:  trip_days, trip_activities
-// Sprint 7:  trip_expenses
-// Sprint 8:  (Calendar queries built on top of existing tables)
-// Sprint 9:  saved_destinations
-// Sprint 10: (Public sharing built on existing trip_shares)
-// Sprint 11: community_posts, comments, likes
-// Sprint 12: (Admin analytics computed from existing tables)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
 
 /// Internal key-value store for application configuration.
-/// Used in Sprint 1 to anchor the Prisma schema and verify DB connectivity.
-/// May be repurposed for feature flags / settings in later sprints.
 model SystemConfig {
   id        Int      @id @default(autoincrement())
   key       String   @unique @db.VarChar(100)
@@ -49,4 +30,94 @@ model SystemConfig {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("system_config")
+}
+
+/// User accounts.
+model User {
+  id              Int             @id @default(autoincrement())
+  firstName       String          @map("first_name") @db.VarChar(50)
+  lastName        String          @map("last_name") @db.VarChar(50)
+  username        String          @unique @db.VarChar(50)
+  email           String          @unique @db.VarChar(100)
+  passwordHash    String          @map("password_hash") @db.VarChar(255)
+  phone           String?         @db.VarChar(20)
+  city            String?         @db.VarChar(100)
+  country         String?         @db.VarChar(100)
+  bio             String?         @db.Text
+  profilePhoto    String?         @map("profile_photo") @db.Text
+  role            Role            @default(USER)
+  isActive        Boolean         @default(true) @map("is_active")
+  isEmailVerified Boolean         @default(false) @map("is_email_verified")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  preference      UserPreference?
+
+  @@map("users")
+}
+
+/// User settings and preferences.
+model UserPreference {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique @map("user_id")
+  language  String   @default("en") @db.VarChar(10)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+/// Master list of countries.
+model Country {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  code      String   @unique @db.VarChar(10)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  cities    City[]
+
+  @@map("countries")
+}
+
+/// Cities within countries.
+model City {
+  id              Int        @id @default(autoincrement())
+  countryId       Int        @map("country_id")
+  name            String     @db.VarChar(100)
+  region          String?    @db.VarChar(100)
+  description     String?    @db.Text
+  image           String?    @db.Text
+  costIndex       Int        @default(3) @map("cost_index")
+  popularityScore Float      @default(0.0) @map("popularity_score")
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+  country         Country    @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  activities      Activity[]
+
+  @@index([name])
+  @@index([region])
+  @@index([countryId])
+  @@map("cities")
+}
+
+/// Travel activities within a city.
+model Activity {
+  id              Int      @id @default(autoincrement())
+  cityId          Int      @map("city_id")
+  name            String   @db.VarChar(150)
+  description     String?  @db.Text
+  type            String   @db.VarChar(100)
+  estimatedCost   Float    @default(0.0) @map("estimated_cost")
+  durationMinutes Int      @default(60) @map("duration_minutes")
+  image           String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  city            City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@index([cityId])
+  @@index([type])
+  @@index([estimatedCost])
+  @@map("activities")
 }
