@@ -293,9 +293,9 @@ server/
 
 ## Current Sprint
 
-**Sprint 3 — Trip Management & Itinerary Engine** ✅
+**Sprint 4 — Budget, Calendar, Dashboard & Sharing** ✅
 
-Builds on Sprint 2 with authenticated trip management, multi-city stops, day-wise itinerary planning, and scheduled activities.
+Builds on Sprint 3 with budget tracking, calendar views, dashboard aggregation, saved destinations, public sharing, and transactional trip copying.
 
 **What is implemented:**
 - TypeScript + Express project scaffolding
@@ -320,13 +320,16 @@ Builds on Sprint 2 with authenticated trip management, multi-city stops, day-wis
 - Unique itinerary days with date-boundary validation
 - Trip-specific activities with time validation, city consistency, and atomic reorder
 - Complete ordered itinerary endpoint
+- Trip budgets, categorized expenses, summaries, daily spending, and over-budget detection
+- Calendar data derived from ordered itinerary days and activities
+- Dashboard with owned trip status groups, popular destinations, and budget highlights
+- Saved destination management with duplicate protection
+- Privacy-safe public trip sharing and authenticated copy-trip workflow
 
 **What is NOT implemented (future sprints):**
-- Budget / expenses
-- Calendar / timeline
-- Community
-- Public sharing
-- Admin analytics
+- Community posts, likes, and comments
+- Admin dashboard and analytics
+- Final security hardening and performance optimization
 
 ---
 
@@ -337,8 +340,8 @@ Builds on Sprint 2 with authenticated trip management, multi-city stops, day-wis
 | ✅ 1 | Backend Foundation |
 | ✅ 2 | Authentication, Users & Travel Data |
 | ✅ 3 | Trip Management, Multi-City Stops & Itinerary |
-| 4 | Budget, Expenses, Calendar & Dashboard |
-| 5 | Public Sharing, Community & Admin |
+| ✅ 4 | Budget, Expenses, Calendar, Dashboard & Sharing |
+| 5 | Community & Admin |
 | 6 | Security, Optimization, Testing & Frontend Integration |
 
 ## Sprint 3 API Endpoints
@@ -358,3 +361,23 @@ All endpoints below require `Authorization: Bearer <token>`.
 | PATCH/DELETE | `/api/trip-activities/:id` | Update or remove a scheduled activity |
 | PATCH | `/api/trip-activities/reorder` | Atomically reorder day activities |
 | GET | `/api/trips/:id/itinerary` | Fetch the ordered complete itinerary |
+
+## Sprint 4 API Endpoints
+
+All private endpoints require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| PATCH | `/api/trips/:tripId/budget` | Set planned budget |
+| POST/GET | `/api/trips/:tripId/expenses` | Create or list expenses |
+| GET/PATCH/DELETE | `/api/trips/:tripId/expenses/:expenseId` | Manage one expense |
+| GET | `/api/trips/:tripId/budget` | Calculate budget summary and category totals |
+| GET | `/api/trips/:tripId/budget/daily` | Calculate daily spending and alerts |
+| GET | `/api/trips/:tripId/calendar` | Return activities grouped by date |
+| GET | `/api/dashboard` | Return owned trip and budget highlights |
+| POST/GET/DELETE | `/api/users/me/saved-destinations/:cityId` | Save, list, or remove destinations |
+| POST/DELETE | `/api/trips/:tripId/share` | Enable or disable public sharing |
+| GET | `/api/public/trips/:shareSlug` | Read-only public itinerary |
+| POST | `/api/public/trips/:shareSlug/copy` | Copy a public itinerary to the logged-in user |
+
+Budget totals use explicit `TripExpense` records only. `TripActivity.customCost` remains an itinerary estimate and is not double-counted. Daily budget is total planned budget divided by inclusive trip days. Copied trips include stops, days, and scheduled activities, reuse master cities and activities, exclude historical expenses, and default to `PRIVATE`.

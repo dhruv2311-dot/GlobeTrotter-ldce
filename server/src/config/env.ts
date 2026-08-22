@@ -34,6 +34,7 @@ const config = {
   app: {
     nodeEnv: optionalEnv('NODE_ENV', 'development'),
     port: optionalEnvNumber('PORT', 5000),
+    frontendUrl: optionalEnv('FRONTEND_URL', 'http://localhost:5173'),
     isDevelopment: optionalEnv('NODE_ENV', 'development') === 'development',
     isProduction: optionalEnv('NODE_ENV', 'development') === 'production',
     isTest: optionalEnv('NODE_ENV', 'development') === 'test',
