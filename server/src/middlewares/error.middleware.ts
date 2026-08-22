@@ -32,7 +32,6 @@ function mapPrismaError(err: { code?: string; message: string }): AppError {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorMiddleware(
   err: unknown,
   _req: Request,
