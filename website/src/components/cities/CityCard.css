@@ -1,24 +1,155 @@
-.city-card { cursor: default; overflow: hidden; }
+/* CityCard.css */
+.city-card {
+  overflow: hidden;
+  border-radius: 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-.city-cover { position: relative; height: 180px; overflow: hidden; }
-.city-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.city-card:hover .city-cover img { transform: scale(1.08); }
-.city-cover-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.9) 0%, transparent 50%); }
-.city-info-overlay { position: absolute; bottom: 0.875rem; left: 0.875rem; }
-.city-name { font-size: 1.1rem; font-weight: 700; color: white; }
-.city-country { display: flex; align-items: center; gap: 0.25rem; color: rgba(255,255,255,0.7); font-size: 0.8rem; }
+.city-card:hover {
+  border-color: rgba(113, 75, 103, 0.4);
+  box-shadow: var(--shadow-lg);
+}
 
-.city-content { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.city-desc { font-size: 0.8rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.city-cover {
+  position: relative;
+  height: 195px;
+  overflow: hidden;
+}
 
-.city-stats { display: flex; gap: 1rem; }
-.city-stat { display: flex; align-items: center; gap: 0.375rem; color: var(--text-muted); flex: 1; }
-.city-stat-value { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: block; }
-.city-stat-label { font-size: 0.7rem; color: var(--text-muted); }
+.city-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
 
-.city-meta { display: flex; flex-direction: column; gap: 0.5rem; }
-.cost-bar { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; }
-.cost-label { color: var(--text-muted); white-space: nowrap; }
-.cost-value { color: var(--text-secondary); white-space: nowrap; }
+.city-card:hover .city-cover img {
+  transform: scale(1.08);
+}
 
-.city-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.city-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.12) 65%, transparent 100%);
+}
+
+.city-badge-top {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+}
+
+.city-info-overlay {
+  position: absolute;
+  bottom: 1rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  z-index: 2;
+}
+
+.city-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.city-country {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.city-content {
+  padding: 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.city-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.45;
+}
+
+.city-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.65rem 0.85rem;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.city-stat-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.city-stat-icon {
+  color: var(--primary);
+}
+
+.city-stat-icon.amber {
+  color: var(--accent);
+}
+
+.city-stat-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+  line-height: 1;
+}
+
+.city-stat-lbl {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cost-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cost-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.city-tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.city-tag-chip {
+  background: rgba(113, 75, 103, 0.12);
+  border: 1px solid rgba(113, 75, 103, 0.25);
+  color: var(--primary);
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.725rem;
+  font-weight: 600;
+}
+
+.city-add-btn {
+  margin-top: 0.25rem;
+}
