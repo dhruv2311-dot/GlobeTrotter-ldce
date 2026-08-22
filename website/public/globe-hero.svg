@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <radialGradient id="heroGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#8B5CF6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#090D16" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="url(#heroGlow)" />
+
+  <!-- World Latitude / Longitude Mesh -->
+  <g stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.5" fill="none">
+    <circle cx="400" cy="400" r="320"/>
+    <circle cx="400" cy="400" r="240"/>
+    <circle cx="400" cy="400" r="160"/>
+    <ellipse cx="400" cy="400" rx="320" ry="120"/>
+    <ellipse cx="400" cy="400" rx="320" ry="220"/>
+    <ellipse cx="400" cy="400" rx="120" ry="320"/>
+    <ellipse cx="400" cy="400" rx="220" ry="320"/>
+    <line x1="80" y1="400" x2="720" y2="400"/>
+    <line x1="400" y1="80" x2="400" y2="720"/>
+  </g>
+
+  <!-- Flight Flight Routes -->
+  <path d="M 160 500 Q 400 150 640 450" fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-dasharray="8 6"/>
+  <path d="M 220 280 Q 550 400 680 250" fill="none" stroke="url(#lineGrad)" stroke-width="2" stroke-dasharray="6 4"/>
+
+  <!-- Glowing City Nodes -->
+  <circle cx="160" cy="500" r="6" fill="#F59E0B"/>
+  <circle cx="400" cy="275" r="8" fill="#06B6D4"/>
+  <circle cx="640" cy="450" r="7" fill="#EC4899"/>
+  <circle cx="220" cy="280" r="6" fill="#10B981"/>
+  <circle cx="680" cy="250" r="6" fill="#3B82F6"/>
+</svg>
