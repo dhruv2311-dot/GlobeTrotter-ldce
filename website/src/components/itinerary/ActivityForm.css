@@ -1,0 +1,10 @@
+.activity-form { overflow: hidden; }
+.activity-form-inner {
+  padding: 1.25rem;
+  background: rgba(30, 136, 229, 0.05);
+  border: 1px solid var(--primary-light);
+  border-radius: var(--radius-md);
+}
+.act-form-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+.act-form-row .form-group { flex: 1; }
+.act-form-actions { display: flex; gap: 0.5rem; }
