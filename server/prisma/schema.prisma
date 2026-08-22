@@ -1,0 +1,52 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// GlobeTrotter — Prisma Schema
+// Sprint 1: Foundation Only
+//
+// This file contains the minimal schema needed to bootstrap the application.
+// Domain entities (users, trips, cities, activities, etc.) will be added in
+// their respective sprints via incremental migrations.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sprint 1: Minimal foundation model.
+//
+// A SystemConfig table is used as a lightweight anchor so Prisma can generate
+// a client and verify database connectivity without introducing any domain
+// models prematurely.
+//
+// Domain tables will be added in future sprints:
+//
+// Sprint 2:  users, roles, user_preferences, password_reset_tokens, refresh_tokens
+// Sprint 3:  countries, cities, activities
+// Sprint 4:  trips, trip_shares
+// Sprint 5:  trip_stops
+// Sprint 6:  trip_days, trip_activities
+// Sprint 7:  trip_expenses
+// Sprint 8:  (Calendar queries built on top of existing tables)
+// Sprint 9:  saved_destinations
+// Sprint 10: (Public sharing built on existing trip_shares)
+// Sprint 11: community_posts, comments, likes
+// Sprint 12: (Admin analytics computed from existing tables)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Internal key-value store for application configuration.
+/// Used in Sprint 1 to anchor the Prisma schema and verify DB connectivity.
+/// May be repurposed for feature flags / settings in later sprints.
+model SystemConfig {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_config")
+}
