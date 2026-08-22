@@ -293,9 +293,9 @@ server/
 
 ## Current Sprint
 
-**Sprint 4 — Budget, Calendar, Dashboard & Sharing** ✅
+**Sprint 5 — Community, Admin & Final Integration** ✅
 
-Builds on Sprint 3 with budget tracking, calendar views, dashboard aggregation, saved destinations, public sharing, and transactional trip copying.
+Completes the backend with community posts, admin analytics, role-protected user management, security review, and final integration coverage.
 
 **What is implemented:**
 - TypeScript + Express project scaffolding
@@ -325,11 +325,12 @@ Builds on Sprint 3 with budget tracking, calendar views, dashboard aggregation, 
 - Dashboard with owned trip status groups, popular destinations, and budget highlights
 - Saved destination management with duplicate protection
 - Privacy-safe public trip sharing and authenticated copy-trip workflow
+- Community posts with search, sorting, pagination, ownership, and safe author/trip projections
+- Admin user management, platform statistics, popular cities/activities, engagement, and trends
 
-**What is NOT implemented (future sprints):**
-- Community posts, likes, and comments
-- Admin dashboard and analytics
-- Final security hardening and performance optimization
+**What is NOT implemented:**
+- Likes, comments, and social notifications
+- Payments, bookings, AI itinerary generation, and external travel integrations
 
 ---
 
@@ -341,8 +342,7 @@ Builds on Sprint 3 with budget tracking, calendar views, dashboard aggregation, 
 | ✅ 2 | Authentication, Users & Travel Data |
 | ✅ 3 | Trip Management, Multi-City Stops & Itinerary |
 | ✅ 4 | Budget, Expenses, Calendar, Dashboard & Sharing |
-| 5 | Community & Admin |
-| 6 | Security, Optimization, Testing & Frontend Integration |
+| ✅ 5 | Community, Admin, Security & Final Integration |
 
 ## Sprint 3 API Endpoints
 

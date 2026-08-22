@@ -10,7 +10,6 @@ import config from './env';
 // In test environments, the client is recreated per-suite to avoid state bleed.
 
 declare global {
-  // eslint-disable-next-line no-var
   var __prisma: PrismaClient | undefined;
 }
 

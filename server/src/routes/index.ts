@@ -9,6 +9,8 @@ import tripRouter, { tripActivityRouter } from './trip.routes';
 import { publicRouter, savedRouter, tripRouter as sprint4TripRouter } from './sprint4.routes';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import * as dashboardController from '../controllers/sprint4.controller';
+import communityRouter from './community.routes';
+import adminRouter from './admin.routes';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Root API Router — Sprint 2
@@ -31,5 +33,7 @@ router.use('/trips', sprint4TripRouter);
 router.use('/users', savedRouter);
 router.use('/public', publicRouter);
 router.get('/dashboard', authMiddleware, dashboardController.dashboard);
+router.use('/community', communityRouter);
+router.use('/admin', adminRouter);
 
 export default router;
