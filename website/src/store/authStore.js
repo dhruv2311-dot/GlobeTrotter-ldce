@@ -2,7 +2,15 @@ import { create } from 'zustand';
 import api from '../lib/api';
 
 const useAuthStore = create((set, get) => ({
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
+  user: (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || 'null');
+    } catch (e) {
+      console.error('Failed to parse user from localStorage:', e);
+      localStorage.removeItem('user');
+      return null;
+    }
+  })(),
   token: localStorage.getItem('token') || null,
   loading: false,
   error: null,
@@ -10,10 +18,13 @@ const useAuthStore = create((set, get) => ({
   login: async (credentials) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.post('/auth/login', credentials);
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      set({ user: data.user, token: data.token, loading: false });
+      const response = await api.post('/auth/login', credentials);
+      console.log('Login response:', response.data);
+      const { user, accessToken } = response.data.data;
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      set({ user, token: accessToken, loading: false });
+      console.log('User state set:', user);
       return { success: true };
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed';
