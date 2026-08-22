@@ -1,3 +1,115 @@
-.cities-filters { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
-.region-tabs { display: flex; gap: 0.375rem; flex-wrap: wrap; }
-.cities-grid-page { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+/* CitiesPage.css */
+.cities-header {
+  margin-bottom: 2rem;
+}
+
+.cities-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 24px;
+  margin-bottom: 2.5rem;
+}
+
+.cities-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  width: 100%;
+}
+
+.search-icon {
+  color: #714B67;
+}
+
+.cities-search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #212529;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.cities-search-bar input::placeholder {
+  color: #6C757D;
+}
+
+.region-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.region-tab {
+  padding: 0.45rem 1rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #495057;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.region-tab:hover {
+  color: #212529;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.region-tab.active {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(113, 75, 103, 0.3);
+}
+
+.cities-grid-page {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.75rem;
+}
+
+.empty-cities-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  border-radius: 24px;
+}
+
+.empty-cities-svg {
+  width: 240px;
+  height: 180px;
+  margin-bottom: 1.5rem;
+}
+
+.empty-cities-card h3 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #212529;
+  margin-bottom: 0.5rem;
+}
+
+.empty-cities-card p {
+  color: #495057;
+}
+
+@media (max-width: 1200px) {
+  .cities-grid-page { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .cities-grid-page { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .cities-grid-page { grid-template-columns: 1fr; }
+}
