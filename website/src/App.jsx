@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/layout/Layout';
@@ -15,22 +16,44 @@ import CommunityPage from './pages/community/CommunityPage';
 import CalendarPage from './pages/calendar/CalendarPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import AdminPage from './pages/admin/AdminPage';
+import LaunchIntro from './components/common/LaunchIntro';
 
 function App() {
+  const [showLaunchIntro, setShowLaunchIntro] = useState(true);
+
+  const completeLaunchIntro = () => {
+    setShowLaunchIntro(false);
+  };
+
   return (
     <BrowserRouter>
+      {showLaunchIntro && <LaunchIntro onComplete={completeLaunchIntro} />}
+
+      {/* Luxury Styled Toaster */}
       <Toaster
         position="top-right"
         toastOptions={{
+          duration: 3500,
           style: {
-            background: '#1E293B',
-            color: '#F1F5F9',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px',
-            fontSize: '0.875rem',
+            background: 'rgba(255, 255, 255, 0.92)',
+            color: '#212529',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '16px',
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            padding: '12px 18px',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(113, 75, 103, 0.15)',
           },
-          success: { iconTheme: { primary: '#43A047', secondary: '#F1F5F9' } },
-          error: { iconTheme: { primary: '#E53935', secondary: '#F1F5F9' } },
+          success: {
+            iconTheme: { primary: '#10B981', secondary: '#FFFFFF' },
+            style: { borderLeft: '4px solid #10B981' },
+          },
+          error: {
+            iconTheme: { primary: '#017E84', secondary: '#FFFFFF' },
+            style: { borderLeft: '4px solid #017E84' },
+          },
         }}
       />
 
