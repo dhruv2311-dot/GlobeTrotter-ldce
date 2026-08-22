@@ -15,10 +15,16 @@ export default function CalendarPage() {
 
   useEffect(() => {
     api.get('/trips').then(({ data }) => {
-      const tripsData = data.data?.trips || data.trips || [];
-      setTrips(Array.isArray(tripsData) ? tripsData : []);
+      const tripsData = data.data?.trips || data.data || data.trips || [];
+      const normalizedTrips = Array.isArray(tripsData) ? tripsData.map((trip) => ({
+        ...trip,
+        tripName: trip.tripName || trip.name,
+        isPublic: trip.isPublic ?? trip.visibility === 'PUBLIC',
+        status: trip.status?.toLowerCase(),
+      })) : [];
+      setTrips(normalizedTrips);
       const evts = [];
-      tripsData.forEach(trip => {
+      normalizedTrips.forEach(trip => {
         evts.push({
           id: trip.id || trip._id,
           title: `✈️ ${trip.tripName || trip.name}`,
@@ -106,7 +112,11 @@ export default function CalendarPage() {
                           {new Date(trip.startDate).toLocaleDateString()} → {new Date(trip.endDate).toLocaleDateString()}
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {trip.stops?.map((s, i) => <span key={i} className="city-chip">{s.city?.name || s.city}</span>)}
+                          {trip.stops?.map((stop, i) => (
+                            <span key={i} className="city-chip">
+                              {stop.city?.name || stop.city} · {new Date(stop.startDate).toLocaleDateString()} – {new Date(stop.endDate).toLocaleDateString()}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </div>

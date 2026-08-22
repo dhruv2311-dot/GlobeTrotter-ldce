@@ -5,6 +5,7 @@ import { MapPin, Calendar, DollarSign, Edit, Trash2, Globe, Lock, Clock, Sparkle
 import { format } from 'date-fns';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
+import { formatTripBudget } from '../../utils/tripBudget';
 import './TripCard.css';
 
 export default function TripCard({ trip, onDelete }) {
@@ -97,7 +98,7 @@ export default function TripCard({ trip, onDelete }) {
         <div className="trip-footer">
           <div className="trip-budget">
             <DollarSign size={15} />
-            <span>${(trip.totalBudget || 0).toLocaleString()}</span>
+            <span>${formatTripBudget(trip)}</span>
           </div>
           <div className="trip-cities">
             {trip.stops?.slice(0, 2).map((s, i) => (

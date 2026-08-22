@@ -8,6 +8,7 @@ import BudgetSummary from '../../components/itinerary/BudgetSummary';
 import { PageLoader } from '../../components/common/Loader';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { formatTripBudget } from '../../utils/tripBudget';
 import './TripDetailPage.css';
 
 export default function TripDetailPage() {
@@ -92,7 +93,7 @@ export default function TripDetailPage() {
           <div className="trip-hero-meta">
             <div className="hero-meta-item"><Calendar size={16} color="#714B67" /> {trip.startDate ? format(new Date(trip.startDate), 'MMM d') : ''} – {trip.endDate ? format(new Date(trip.endDate), 'MMM d, yyyy') : ''}</div>
             <div className="hero-meta-item"><MapPin size={16} color="#714B67" /> {trip.stops?.length || 0} Destination Stops</div>
-            <div className="hero-meta-item"><DollarSign size={16} color="#10B981" /> ${(trip.totalBudget || 0).toLocaleString()} Total Budget</div>
+            <div className="hero-meta-item"><DollarSign size={16} color="#10B981" /> ${formatTripBudget(trip)} Total Budget</div>
             <div className="hero-meta-item"><Eye size={16} color="#017E84" /> {trip.views || 1} Views</div>
           </div>
         </div>

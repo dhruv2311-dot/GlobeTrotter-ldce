@@ -30,8 +30,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     api.get('/trips').then(({ data }) => {
-      const tripsData = data.data?.trips || data.trips || [];
-      setTrips(Array.isArray(tripsData) ? tripsData : []);
+      const tripsData = data.data?.trips || data.data || data.trips || [];
+      setTrips(Array.isArray(tripsData) ? tripsData.map((trip) => ({
+        ...trip,
+        tripName: trip.tripName || trip.name,
+        totalBudget: trip.totalBudget ?? trip.budgetAmount ?? 0,
+        isPublic: trip.isPublic ?? trip.visibility === 'PUBLIC',
+        status: trip.status?.toLowerCase(),
+      })) : []);
     }).catch(() => {
       setTrips([]);
     });

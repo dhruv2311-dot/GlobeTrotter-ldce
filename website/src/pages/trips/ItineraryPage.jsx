@@ -11,6 +11,7 @@ import BudgetSummary from '../../components/itinerary/BudgetSummary';
 import { PageLoader } from '../../components/common/Loader';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { formatTripBudget } from '../../utils/tripBudget';
 import './ItineraryPage.css';
 
 function SortableStop({ stop, onDelete, onUpdate, tripId }) {
@@ -181,7 +182,7 @@ export default function ItineraryPage() {
           </div>
           <h1 className="page-title">{trip.tripName}</h1>
           <p className="page-subtitle">
-            {trip.stops?.length || 0} stops • ${trip.totalBudget?.toLocaleString() || 0} calculated budget
+            {trip.stops?.length || 0} stops • ${formatTripBudget(trip)} calculated budget
           </p>
         </div>
         <div className="view-tabs">

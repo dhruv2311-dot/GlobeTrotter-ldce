@@ -2,12 +2,13 @@ import React from 'react';
 import './BudgetSummary.css';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import { DollarSign, PieChart as PieIcon, BarChart2 } from 'lucide-react';
+import { getTripBudget } from '../../utils/tripBudget';
 
 const COLORS = ['#714B67', '#017E84', '#10B981', '#017E84', '#714B67', '#714B67', '#017E84', '#714B67'];
 
 export default function BudgetSummary({ trip, compact = false }) {
   const stops = trip.stops || [];
-  const totalBudget = trip.totalBudget || 0;
+  const totalBudget = getTripBudget(trip);
 
   const stopBudgets = stops.map((stop) => ({
     name: stop.city?.name || stop.city,
