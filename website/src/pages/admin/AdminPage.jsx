@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, Users, Map, Globe, TrendingUp, AlertTriangle, Trash2, ToggleLeft, ToggleRight, Database } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart3, Users, Map, Globe, TrendingUp, AlertTriangle, Trash2, ToggleLeft, ToggleRight, Database, Sparkles, Shield } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { ButtonSpinner } from '../../components/common/Loader';
 import './AdminPage.css';
 
-const COLORS = ['#1E88E5', '#FFB300', '#43A047', '#E53935', '#9C27B0', '#FF5722', '#00BCD4', '#795548'];
+const COLORS = ['#714B67', '#017E84', '#10B981', '#017E84', '#714B67', '#714B67', '#017E84', '#714B67'];
 
 const stagger = { animate: { transition: { staggerChildren: 0.08 } } };
 const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
@@ -24,8 +25,8 @@ export default function AdminPage() {
       api.get('/admin/analytics'),
       api.get('/admin/users'),
     ]).then(([anlRes, usrRes]) => {
-      setAnalytics(anlRes.data.analytics);
-      setUsers(usrRes.data.users);
+      setAnalytics(anlRes.data.analytics || anlRes.data.data?.analytics);
+      setUsers(usrRes.data.users || usrRes.data.data?.users || []);
     }).catch(() => toast.error('Failed to load admin data'))
       .finally(() => setLoading(false));
   }, []);
@@ -33,17 +34,17 @@ export default function AdminPage() {
   const handleToggleUser = async (id) => {
     try {
       const { data } = await api.put(`/admin/users/${id}/toggle`);
-      setUsers(prev => prev.map(u => u._id === id ? data.user : u));
+      setUsers(prev => prev.map(u => (u.id || u._id) === id ? (data.user || data.data?.user) : u));
       toast.success('User status updated');
     } catch { toast.error('Failed to update user'); }
   };
 
   const handleDeleteUser = async (id) => {
-    if (!confirm('Delete this user and all their trips?')) return;
+    if (!confirm('Are you sure you want to delete this user and all their itineraries?')) return;
     try {
       await api.delete(`/admin/users/${id}`);
-      setUsers(prev => prev.filter(u => u._id !== id));
-      toast.success('User deleted');
+      setUsers(prev => prev.filter(u => (u.id || u._id) !== id));
+      toast.success('User deleted successfully');
     } catch { toast.error('Failed to delete user'); }
   };
 
@@ -51,110 +52,113 @@ export default function AdminPage() {
     setSeeding(true);
     try {
       const { data } = await api.post('/admin/seed');
-      toast.success(`Seeded ${data.cities} cities + ${data.activities} activities!`);
-    } catch { toast.error('Seeding failed'); }
+      toast.success(`Successfully seeded destination database!`);
+    } catch { toast.error('Seeding process failed'); }
     finally { setSeeding(false); }
   };
 
-  if (loading) return <div className="loading-screen"><div className="spinner" /></div>;
+  if (loading) return (
+    <div className="container" style={{ paddingTop: '5rem', textAlign: 'center' }}>
+      <ButtonSpinner />
+      <p style={{ marginTop: '1rem', color: '#495057' }}>Loading Admin Control Center...</p>
+    </div>
+  );
 
-  const TABS = ['overview', 'users', 'analytics'];
+  const TABS = ['overview', 'users'];
 
   const statCards = [
-    { label: 'Total Users', value: analytics?.totalUsers || 0, icon: <Users size={22} />, color: 'primary' },
-    { label: 'Total Trips', value: analytics?.totalTrips || 0, icon: <Map size={22} />, color: 'success' },
-    { label: 'Public Trips', value: analytics?.publicTrips || 0, icon: <Globe size={22} />, color: 'accent' },
-    { label: 'Cities', value: analytics?.totalCities || 0, icon: <TrendingUp size={22} />, color: 'warning' },
+    { label: 'Total Platform Users', value: analytics?.totalUsers || users.length || 0, icon: <Users size={24} />, color: 'cyan' },
+    { label: 'Total Itineraries', value: analytics?.totalTrips || 0, icon: <Map size={24} />, color: 'emerald' },
+    { label: 'Public Community Plans', value: analytics?.publicTrips || 0, icon: <Globe size={24} />, color: 'amber' },
+    { label: 'Cities Cataloged', value: analytics?.totalCities || 0, icon: <TrendingUp size={24} />, color: 'violet' },
   ];
 
   return (
-    <div className="admin-page container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
+    <div className="admin-page container" style={{ paddingTop: '2.5rem', paddingBottom: '4rem' }}>
+      {/* Header */}
       <div className="admin-header">
         <div>
-          <h1 className="page-title"><BarChart3 size={28} style={{ display: 'inline', color: 'var(--primary)' }} /> Admin Panel</h1>
-          <p className="page-subtitle">GlobeTrotter Platform Overview</p>
+          <div className="badge badge-violet" style={{ marginBottom: '0.6rem' }}>
+            <Shield size={12} /> System Admin Workspace
+          </div>
+          <h1 className="page-title">Admin Dashboard 🛡</h1>
+          <p className="page-subtitle">GlobeTrotter system analytics, user management, and dataset seeding</p>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={handleSeedData} disabled={seeding}>
-          <Database size={16} /> {seeding ? 'Seeding...' : 'Seed Sample Data'}
-        </button>
-        <div className="admin-tabs">
-          {TABS.map(t => <button key={t} className={`tab-btn ${activeTab === t ? 'active' : ''}`} onClick={() => setActiveTab(t)}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>)}
+
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button className="btn btn-ghost btn-sm" onClick={handleSeedData} disabled={seeding}>
+            <Database size={16} /> {seeding ? 'Seeding Database...' : 'Seed Sample Database'}
+          </button>
+          
+          <div className="admin-tabs glass-card">
+            {TABS.map(t => (
+              <button key={t} className={`tab-btn ${activeTab === t ? 'active' : ''}`} onClick={() => setActiveTab(t)}>
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <motion.div className="admin-stats" variants={stagger} initial="initial" animate="animate">
+      {/* Metric Cards */}
+      <motion.div className="admin-stats-grid" variants={stagger} initial="initial" animate="animate">
         {statCards.map(sc => (
-          <motion.div key={sc.label} variants={fadeUp} className={`stat-card stat-card-${sc.color}`}>
-            <div className={`stat-icon stat-icon-${sc.color}`}>{sc.icon}</div>
-            <div className="stat-number">{sc.value.toLocaleString()}</div>
-            <div className="stat-label">{sc.label}</div>
+          <motion.div key={sc.label} variants={fadeUp} className={`admin-stat-card card-${sc.color}`}>
+            <div className={`admin-stat-icon icon-${sc.color}`}>{sc.icon}</div>
+            <div>
+              <div className="admin-stat-number">{sc.value.toLocaleString()}</div>
+              <div className="admin-stat-label">{sc.label}</div>
+            </div>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* Overview */}
+      {/* Analytics Overview Tab */}
       {activeTab === 'overview' && (
-        <motion.div className="admin-charts" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <motion.div className="admin-charts-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           {/* Top Cities */}
           {analytics?.topCities?.length > 0 && (
             <div className="admin-chart-card glass-card">
-              <h3>🏙 Top Cities by Trip Count</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={analytics.topCities.map(c => ({ name: c._id, count: c.count }))} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <XAxis dataKey="name" stroke="var(--text-muted)" tick={{ fontSize: 11 }} />
-                  <YAxis stroke="var(--text-muted)" tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-                  <Bar dataKey="count" fill="var(--primary)" radius={[6, 6, 0, 0]} />
+              <h3 className="chart-title">🏙 Top Cities by Trip Count</h3>
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={analytics.topCities.map(c => ({ name: c._id || c.name, count: c.count }))}>
+                  <XAxis dataKey="name" stroke="#6C757D" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#6C757D" tick={{ fontSize: 11 }} />
+                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid rgba(0, 0, 0, 0.1)', borderRadius: '12px', color: '#212529' }} />
+                  <Bar dataKey="count" fill="#714B67" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
 
-          {/* Activities by category */}
+          {/* Activities by Category */}
           {analytics?.activitiesByCategory?.length > 0 && (
             <div className="admin-chart-card glass-card">
-              <h3>🎯 Activities by Category</h3>
-              <ResponsiveContainer width="100%" height={280}>
+              <h3 className="chart-title">🎯 Activities by Category</h3>
+              <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
-                  <Pie data={analytics.activitiesByCategory.map(a => ({ name: a._id, value: a.count }))}
-                    dataKey="value" cx="50%" cy="50%" outerRadius={100} label={({ name }) => name}>
+                  <Pie data={analytics.activitiesByCategory.map(a => ({ name: a._id || a.name, value: a.count }))}
+                    dataKey="value" cx="50%" cy="50%" outerRadius={90} label={({ name }) => name}>
                     {analytics.activitiesByCategory.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid rgba(0, 0, 0, 0.1)', borderRadius: '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           )}
 
-          {/* Trip status pie */}
-          {analytics?.tripsByStatus?.length > 0 && (
-            <div className="admin-chart-card glass-card">
-              <h3>📊 Trips by Status</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie data={analytics.tripsByStatus.map(s => ({ name: s._id, value: s.count }))}
-                    dataKey="value" cx="50%" cy="50%" outerRadius={100} label={({ name, value }) => `${name}: ${value}`}>
-                    {analytics.tripsByStatus.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-
-          {/* Recent users */}
-          <div className="admin-chart-card glass-card">
-            <h3>👤 Recently Joined Users</h3>
+          {/* Recent Users List */}
+          <div className="admin-chart-card glass-card" style={{ gridColumn: '1 / -1' }}>
+            <h3 className="chart-title">👤 Recently Registered Users</h3>
             <div className="recent-users-list">
               {analytics?.recentUsers?.map(u => (
-                <div key={u._id} className="recent-user-row">
-                  <img src={u.profileImage} className="avatar avatar-sm" alt="" onError={e => e.target.src = `https://ui-avatars.com/api/?name=${u.firstName}&background=1E88E5&color=fff`} />
+                <div key={u._id || u.id} className="recent-user-row">
+                  <div className="user-avatar-circle">{(u.firstName || 'U')[0]}</div>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{u.firstName} {u.lastName}</span>
-                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{u.email}</span>
+                    <span className="user-row-name">{u.firstName} {u.lastName}</span>
+                    <span className="user-row-email">{u.email}</span>
                   </div>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{format(new Date(u.createdAt), 'MMM d, yyyy')}</span>
+                  <span className="user-row-date">{u.createdAt ? format(new Date(u.createdAt), 'MMM d, yyyy') : 'Recent'}</span>
                 </div>
               ))}
             </div>
@@ -162,11 +166,11 @@ export default function AdminPage() {
         </motion.div>
       )}
 
-      {/* Users Management */}
+      {/* User Management Tab */}
       {activeTab === 'users' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="admin-users-table glass-card">
-            <h3><Users size={18} /> User Management ({users.length})</h3>
+            <h3 className="chart-title" style={{ marginBottom: '1.25rem' }}>User Directory ({users.length})</h3>
             <div className="users-table-wrapper">
               <table className="users-table">
                 <thead>
@@ -175,29 +179,29 @@ export default function AdminPage() {
                     <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
-                    <th>Joined</th>
+                    <th>Joined Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map(u => (
-                    <tr key={u._id}>
+                    <tr key={u.id || u._id}>
                       <td>
                         <div className="user-cell">
-                          <img src={u.profileImage} className="avatar avatar-sm" alt="" onError={e => e.target.src = `https://ui-avatars.com/api/?name=${u.firstName}&background=1E88E5&color=fff`} />
+                          <div className="user-avatar-circle">{(u.firstName || 'U')[0]}</div>
                           <span>{u.firstName} {u.lastName}</span>
                         </div>
                       </td>
-                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{u.email}</td>
-                      <td><span className={`badge ${u.role === 'admin' ? 'badge-danger' : 'badge-muted'}`}>{u.role}</span></td>
-                      <td><span className={`badge ${u.isActive ? 'badge-success' : 'badge-danger'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
-                      <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{format(new Date(u.createdAt), 'MMM d, yy')}</td>
+                      <td style={{ color: '#495057', fontSize: '0.875rem' }}>{u.email}</td>
+                      <td><span className={`badge ${u.role === 'admin' ? 'badge-violet' : 'badge-cyan'}`}>{u.role}</span></td>
+                      <td><span className={`badge ${u.isActive ? 'badge-emerald' : 'badge-rose'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
+                      <td style={{ color: '#6C757D', fontSize: '0.85rem' }}>{u.createdAt ? format(new Date(u.createdAt), 'MMM d, yyyy') : 'Recent'}</td>
                       <td>
-                        <div className="flex gap-2">
-                          <button className="btn btn-ghost btn-sm" onClick={() => handleToggleUser(u._id)}>
-                            {u.isActive ? <ToggleRight size={16} style={{ color: 'var(--success)' }} /> : <ToggleLeft size={16} />}
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleToggleUser(u.id || u._id)}>
+                            {u.isActive ? <ToggleRight size={18} color="#10B981" /> : <ToggleLeft size={18} color="#495057" />}
                           </button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteUser(u._id)}>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteUser(u.id || u._id)}>
                             <Trash2 size={14} />
                           </button>
                         </div>
