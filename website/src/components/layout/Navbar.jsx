@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
+import { getAvatarUrl } from '../../utils/avatarUtils';
+import NotificationPopup from '../common/NotificationPopup';
 import { 
-  Globe, Home, Map, Search, Users, BarChart3, User, 
-  LogOut, Menu, X, Plus, Calendar, Compass, Bell, Settings
+  Globe, Home, Map, Users, BarChart3, User, 
+  LogOut, Menu, X, Plus, Calendar, Compass, Bell, Settings, Sparkles, Shield
 } from 'lucide-react';
 import './Navbar.css';
 
@@ -22,6 +24,7 @@ export default function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -32,103 +35,135 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <div className="navbar-inner container">
-          {/* Logo */}
+          {/* Brand Logo */}
           <Link to="/dashboard" className="navbar-logo">
-            <div className="logo-icon">
-              <Globe size={22} />
+            <div className="logo-icon-wrapper">
+              <img src="/logo.svg" alt="GlobeTrotter" className="logo-svg-img" />
             </div>
-            <span className="logo-text">Globe<span>Trotter</span></span>
+            <span className="logo-text">Globe<span className="logo-highlight">Trotter</span></span>
+            <span className="badge badge-cyan logo-badge">PRO</span>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Navigation Links */}
           <div className="navbar-links">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`nav-link ${location.pathname.startsWith(link.to) ? 'active' : ''}`}
-              >
-                {link.icon}
-                <span>{link.label}</span>
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.to || (link.to !== '/dashboard' && location.pathname.startsWith(link.to));
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`nav-link ${isActive ? 'active' : ''}`}
+                >
+                  {link.icon}
+                  <span>{link.label}</span>
+                  {isActive && <motion.div layoutId="navIndicator" className="nav-active-pill" />}
+                </Link>
+              );
+            })}
             {user?.role === 'admin' && (
               <Link to="/admin" className={`nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`}>
-                <BarChart3 size={18} />
+                <Shield size={18} />
                 <span>Admin</span>
               </Link>
             )}
           </div>
 
-          {/* Right Section */}
+          {/* Right Action Icons & Profile */}
           <div className="navbar-right">
-            <button className="btn btn-primary btn-sm" onClick={() => navigate('/trips/create')}>
-              <Plus size={16} />
-              Plan Trip
+            {/* Notification Bell */}
+            <div className="notif-wrapper">
+              <button 
+                className={`nav-icon-btn ${notifOpen ? 'active' : ''}`} 
+                onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false); }}
+                title="Notifications"
+              >
+                <Bell size={20} />
+                <span className="notif-indicator" />
+              </button>
+
+              <AnimatePresence>
+                {notifOpen && (
+                  <NotificationPopup onClose={() => setNotifOpen(false)} />
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Plan Trip CTA */}
+            <button className="btn btn-primary nav-plan-btn" onClick={() => navigate('/trips/create')}>
+              <Plus size={18} />
+              <span>Plan Trip</span>
             </button>
 
-            {/* Profile dropdown */}
+            {/* Profile Avatar & Dropdown */}
             <div className="profile-wrapper">
-              <button className="profile-btn" onClick={() => setProfileOpen(!profileOpen)}>
+              <button 
+                className={`profile-btn ${profileOpen ? 'active' : ''}`} 
+                onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false); }}
+              >
                 <img 
-                  src={user?.profileImage} 
+                  src={getAvatarUrl(user?.firstName, user?.lastName, user?.profilePhoto || user?.profileImage)}
                   alt={user?.firstName}
-                  className="avatar avatar-sm"
-                  onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1E88E5&color=fff`; }}
+                  className="avatar avatar-sm profile-avatar-img"
                 />
-                <span className="profile-name">{user?.firstName}</span>
+                <span className="profile-name">{user?.firstName || 'Traveler'}</span>
               </button>
 
               <AnimatePresence>
                 {profileOpen && (
                   <motion.div
                     className="profile-dropdown"
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
                   >
                     <div className="dropdown-header">
                       <img
-                        src={user?.profileImage}
+                        src={getAvatarUrl(user?.firstName, user?.lastName, user?.profilePhoto || user?.profileImage)}
                         alt={user?.firstName}
                         className="avatar avatar-md"
-                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}&background=1E88E5&color=fff`; }}
                       />
-                      <div>
+                      <div className="dropdown-user-info">
                         <p className="dropdown-name">{user?.firstName} {user?.lastName}</p>
                         <p className="dropdown-email">{user?.email}</p>
+                        <span className="badge badge-amber dropdown-badge">
+                          <Sparkles size={12} /> Globe Trotter Level 5
+                        </span>
                       </div>
                     </div>
-                    <hr className="divider" />
+                    
+                    <div className="dropdown-divider" />
+                    
                     <Link to="/profile" className="dropdown-item" onClick={() => setProfileOpen(false)}>
-                      <User size={16} /> Profile
+                      <User size={16} /> My Profile
                     </Link>
                     <Link to="/profile?tab=settings" className="dropdown-item" onClick={() => setProfileOpen(false)}>
-                      <Settings size={16} /> Settings
+                      <Settings size={16} /> Account Settings
                     </Link>
                     {user?.role === 'admin' && (
-                      <Link to="/admin" className="dropdown-item" onClick={() => setProfileOpen(false)}>
-                        <BarChart3 size={16} /> Admin Panel
+                      <Link to="/admin" className="dropdown-item admin-item" onClick={() => setProfileOpen(false)}>
+                        <BarChart3 size={16} /> Admin Dashboard
                       </Link>
                     )}
-                    <hr className="divider" />
+                    
+                    <div className="dropdown-divider" />
+                    
                     <button className="dropdown-item danger" onClick={handleLogout}>
-                      <LogOut size={16} /> Logout
+                      <LogOut size={16} /> Sign Out
                     </button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile Hamburger Toggle */}
             <button className="mobile-menu-btn" onClick={() => setMobileOpen(!mobileOpen)}>
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Nav */}
+        {/* Mobile Navigation Drawer */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
@@ -151,20 +186,22 @@ export default function Navbar() {
               ))}
               {user?.role === 'admin' && (
                 <Link to="/admin" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                  <BarChart3 size={18} /> Admin
+                  <Shield size={18} /> Admin Panel
                 </Link>
               )}
               <Link to="/profile" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                <User size={18} /> Profile
+                <User size={18} /> Profile Settings
               </Link>
               <button className="mobile-nav-link danger" onClick={handleLogout}>
-                <LogOut size={18} /> Logout
+                <LogOut size={18} /> Sign Out
               </button>
             </motion.div>
           )}
         </AnimatePresence>
       </nav>
-      {profileOpen && <div className="nav-backdrop" onClick={() => setProfileOpen(false)} />}
+      {(profileOpen || notifOpen) && (
+        <div className="nav-backdrop" onClick={() => { setProfileOpen(false); setNotifOpen(false); }} />
+      )}
     </>
   );
 }
