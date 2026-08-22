@@ -19,6 +19,11 @@ enum Role {
   ADMIN
 }
 
+enum Visibility {
+  PRIVATE
+  PUBLIC
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 /// Internal key-value store for application configuration.
@@ -51,6 +56,7 @@ model User {
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
   preference      UserPreference?
+  trips           Trip[]
 
   @@map("users")
 }
@@ -60,8 +66,8 @@ model UserPreference {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique @map("user_id")
   language  String   @default("en") @db.VarChar(10)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_preferences")
@@ -95,6 +101,7 @@ model City {
   updatedAt       DateTime   @updatedAt @map("updated_at")
   country         Country    @relation(fields: [countryId], references: [id], onDelete: Restrict)
   activities      Activity[]
+  tripStops       TripStop[]
 
   @@index([name])
   @@index([region])
@@ -104,20 +111,97 @@ model City {
 
 /// Travel activities within a city.
 model Activity {
-  id              Int      @id @default(autoincrement())
-  cityId          Int      @map("city_id")
-  name            String   @db.VarChar(150)
-  description     String?  @db.Text
-  type            String   @db.VarChar(100)
-  estimatedCost   Float    @default(0.0) @map("estimated_cost")
-  durationMinutes Int      @default(60) @map("duration_minutes")
-  image           String?  @db.Text
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-  city            City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  id              Int            @id @default(autoincrement())
+  cityId          Int            @map("city_id")
+  name            String         @db.VarChar(150)
+  description     String?        @db.Text
+  type            String         @db.VarChar(100)
+  estimatedCost   Float          @default(0.0) @map("estimated_cost")
+  durationMinutes Int            @default(60) @map("duration_minutes")
+  image           String?        @db.Text
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  city            City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  tripActivities  TripActivity[]
 
   @@index([cityId])
   @@index([type])
   @@index([estimatedCost])
   @@map("activities")
+}
+
+model Trip {
+  id          Int        @id @default(autoincrement())
+  userId      Int        @map("user_id")
+  name        String     @db.VarChar(150)
+  description String?    @db.Text
+  coverPhoto  String?    @map("cover_photo") @db.Text
+  startDate   DateTime   @map("start_date") @db.Date
+  endDate     DateTime   @map("end_date") @db.Date
+  visibility  Visibility @default(PRIVATE)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops       TripStop[]
+  days        TripDay[]
+
+  @@index([userId])
+  @@index([startDate, endDate])
+  @@map("trips")
+}
+
+model TripStop {
+  id        Int      @id @default(autoincrement())
+  tripId    Int      @map("trip_id")
+  cityId    Int      @map("city_id")
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+  order     Int
+  notes     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Restrict)
+
+  @@unique([tripId, order])
+  @@index([tripId])
+  @@index([cityId])
+  @@index([startDate, endDate])
+  @@map("trip_stops")
+}
+
+model TripDay {
+  id         Int            @id @default(autoincrement())
+  tripId     Int            @map("trip_id")
+  date       DateTime       @db.Date
+  title      String?        @db.VarChar(150)
+  notes      String?        @db.Text
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
+  trip       Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  activities TripActivity[]
+
+  @@unique([tripId, date])
+  @@index([tripId, date])
+  @@map("trip_days")
+}
+
+model TripActivity {
+  id         Int      @id @default(autoincrement())
+  tripDayId  Int      @map("trip_day_id")
+  activityId Int      @map("activity_id")
+  startTime  String?  @map("start_time") @db.VarChar(5)
+  endTime    String?  @map("end_time") @db.VarChar(5)
+  customCost Float?   @map("custom_cost")
+  notes      String?  @db.Text
+  sequence   Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  tripDay    TripDay  @relation(fields: [tripDayId], references: [id], onDelete: Cascade)
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Restrict)
+
+  @@unique([tripDayId, sequence])
+  @@index([tripDayId])
+  @@index([activityId])
+  @@map("trip_activities")
 }

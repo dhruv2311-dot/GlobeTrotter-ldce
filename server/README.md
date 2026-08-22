@@ -293,9 +293,9 @@ server/
 
 ## Current Sprint
 
-**Sprint 2 — Authentication, Users & Travel Data** ✅
+**Sprint 3 — Trip Management & Itinerary Engine** ✅
 
-Builds on the backend foundation with JWT authentication, role-based access, user management, and read APIs for countries, cities, and activities.
+Builds on Sprint 2 with authenticated trip management, multi-city stops, day-wise itinerary planning, and scheduled activities.
 
 **What is implemented:**
 - TypeScript + Express project scaffolding
@@ -315,9 +315,13 @@ Builds on the backend foundation with JWT authentication, role-based access, use
 - User registration, login, profile, and management endpoints
 - Country, city, and activity read endpoints with filtering and pagination
 - Prisma seed data for Sprint 2 entities
+- Trip CRUD with computed UPCOMING, ONGOING, and COMPLETED status
+- Owned trip stops with date validation, overlap protection, and atomic reorder
+- Unique itinerary days with date-boundary validation
+- Trip-specific activities with time validation, city consistency, and atomic reorder
+- Complete ordered itinerary endpoint
 
 **What is NOT implemented (future sprints):**
-- Trips / stops / itinerary
 - Budget / expenses
 - Calendar / timeline
 - Community
@@ -332,14 +336,25 @@ Builds on the backend foundation with JWT authentication, role-based access, use
 |---|---|
 | ✅ 1 | Backend Foundation |
 | ✅ 2 | Authentication, Users & Travel Data |
-| 3 | Countries, Cities & Activities |
-| 4 | Trip Management |
-| 5 | Multi-City Stops |
-| 6 | Itinerary Builder |
-| 7 | Budget & Expenses |
-| 8 | Calendar & Timeline |
-| 9 | Dashboard & Personalization |
-| 10 | Public Sharing & Copy Trip |
-| 11 | Community |
-| 12 | Admin & Analytics |
-| 13 | Security, Optimization, Testing & Frontend Integration |
+| ✅ 3 | Trip Management, Multi-City Stops & Itinerary |
+| 4 | Budget, Expenses, Calendar & Dashboard |
+| 5 | Public Sharing, Community & Admin |
+| 6 | Security, Optimization, Testing & Frontend Integration |
+
+## Sprint 3 API Endpoints
+
+All endpoints below require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST/GET | `/api/trips` | Create or list owned trips |
+| GET/PATCH/DELETE | `/api/trips/:id` | Retrieve, update, or delete a trip |
+| POST/GET | `/api/trips/:id/stops` | Add or list city stops |
+| GET/PATCH/DELETE | `/api/trips/:id/stops/:stopId` | Manage one stop |
+| PATCH | `/api/trips/:id/stops/reorder` | Atomically reorder stops |
+| POST/GET | `/api/trips/:id/days` | Create or list itinerary days |
+| GET/PATCH/DELETE | `/api/trips/:id/days/:dayId` | Manage one itinerary day |
+| POST | `/api/trips/:id/days/:dayId/activities` | Schedule an activity |
+| PATCH/DELETE | `/api/trip-activities/:id` | Update or remove a scheduled activity |
+| PATCH | `/api/trip-activities/reorder` | Atomically reorder day activities |
+| GET | `/api/trips/:id/itinerary` | Fetch the ordered complete itinerary |
