@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Users, Heart, MessageSquare, Globe2, Copy, Filter } from 'lucide-react';
+import { Search, Users, Heart, MessageSquare, Globe2, Copy, Sparkles, MapPin, Calendar, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
-import useAuthStore from '../../store/authStore';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { SkeletonCard } from '../../components/common/Loader';
 import toast from 'react-hot-toast';
 import './CommunityPage.css';
 
 export default function CommunityPage() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -24,116 +23,106 @@ export default function CommunityPage() {
     try {
       const params = { page, limit: 12 };
       if (search) params.search = search;
-      const { data } = await api.get('/trips/community', { params });
-      setTrips(data.trips);
-      setTotalPages(data.pages);
+      const { data } = await api.get('/community/posts', { params });
+      const postsData = data.data?.items || data.data?.posts || data.data || data.items || data.posts || [];
+      setTrips(Array.isArray(postsData) ? postsData : []);
+      setTotalPages(data.meta?.totalPages || data.data?.meta?.totalPages || data.pages || 1);
     } catch (err) {
-      console.error('Failed to fetch community trips:', err);
-      setError(err.message || 'Failed to fetch community trips');
+      console.error('Failed to fetch community posts:', err);
+      setError(err.message || 'Failed to fetch community posts');
+      setTrips([]);
     } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchTrips(); }, [search, page]);
 
-  const handleLike = async (tripId, e) => {
-    e.stopPropagation();
-    try {
-      const { data } = await api.post(`/trips/${tripId}/like`);
-      setTrips(prev => prev.map(t => t._id === tripId
-        ? { ...t, likes: Array(data.likes).fill(null) }
-        : t
-      ));
-    } catch { toast.error('Failed to like'); }
-  };
-
   return (
-    <div className="community-page container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-      <div className="community-hero">
+    <div className="community-page container" style={{ paddingTop: '2.5rem', paddingBottom: '4rem' }}>
+      {/* Hero Header */}
+      <div className="community-hero glass-card">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="page-title">🌍 Community Itineraries</h1>
-          <p className="page-subtitle">Discover real trips shared by travelers worldwide</p>
+          <div className="badge badge-amber" style={{ marginBottom: '0.6rem' }}>
+            <Sparkles size={12} /> Global Traveler Network
+          </div>
+          <h1 className="page-title">Community Travel Hub 🌍</h1>
+          <p className="page-subtitle">Discover authentic travel itineraries & insider destination guides shared by real travelers</p>
         </motion.div>
-        <div className="search-bar" style={{ maxWidth: 480 }}>
-          <Search size={18} style={{ color: 'var(--text-muted)' }} />
-          <input placeholder="Search community trips..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
+        
+        <div className="community-search-box">
+          <Search size={18} className="search-icon" />
+          <input 
+            placeholder="Search community posts, places, or travel stories..." 
+            value={search} 
+            onChange={e => { setSearch(e.target.value); setPage(1); }} 
+          />
         </div>
       </div>
 
+      {/* Main Grid Content */}
       {loading ? (
-        <div className="loading-screen"><div className="spinner" /></div>
+        <div style={{ marginTop: '2rem' }}>
+          <SkeletonCard count={6} />
+        </div>
       ) : error ? (
-        <div className="empty-state error-state" style={{ border: '1px solid rgba(229, 57, 53, 0.2)', padding: '3rem', borderRadius: 'var(--radius-lg)', background: 'rgba(229, 57, 53, 0.05)' }}>
-          <div className="badge badge-danger" style={{ marginBottom: '1rem', padding: '0.5rem 1rem' }}>Connection Error</div>
-          <h3 style={{ color: 'var(--danger)', marginBottom: '0.5rem' }}>Failed to Load Community Trips</h3>
-          <p style={{ maxWidth: '550px', margin: '0 auto 1.5rem', color: 'var(--text-secondary)' }}>
-            We couldn't connect to the backend server to fetch community trips. Please check if your <strong>VITE_API_URL</strong> environment variable is set in your deployment configurations to point to your live backend server API.
+        <div className="empty-state error-state glass-card" style={{ padding: '3rem', textAlign: 'center' }}>
+          <span className="badge badge-rose">Connection Error</span>
+          <h3 style={{ color: 'var(--accent)', margin: '0.75rem 0' }}>Failed to Load Community Hub</h3>
+          <p style={{ maxWidth: '550px', margin: '0 auto 1.5rem', color: '#495057' }}>
+            Backend API is unavailable.
           </p>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'monospace', background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', display: 'inline-block', textAlign: 'left' }}>
-            <strong>Attempted URL:</strong> {api.defaults.baseURL}/trips/community<br />
-            <strong>Error Details:</strong> {error}
-          </div>
         </div>
       ) : trips.length === 0 ? (
-        <div className="empty-state">
-          <Globe2 size={64} className="empty-icon" />
-          <h3>No public trips found</h3>
-          <p>Be the first to share your itinerary with the world!</p>
+        <div className="empty-community-card glass-card">
+          <img src="/empty-community.svg" alt="Empty Community" className="empty-community-svg" />
+          <h3>No Public Trips Found</h3>
+          <p>Be the first traveler to publish an itinerary to the global community!</p>
         </div>
       ) : (
         <motion.div className="community-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          {trips.map((trip, i) => (
+          {trips.map((post, i) => (
             <motion.div
-              key={trip._id}
-              className="community-card card"
+              key={post.id || post._id}
+              className="community-card glass-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              onClick={() => navigate(`/trips/${trip._id}`)}
+              whileHover={{ y: -6, scale: 1.01 }}
+              onClick={() => post.trip?.id ? navigate(`/trips/${post.trip.id}`) : null}
             >
               <div className="community-card-cover">
-                <img src={trip.coverPhoto} alt={trip.tripName}
-                  onError={e => e.target.src = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&q=60'} />
+                <img 
+                  src={post.image || post.coverPhoto || 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&q=70'} 
+                  alt={post.title || post.trip?.name || 'Community itinerary'}
+                  onError={e => e.target.src = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=800&q=70'} 
+                />
                 <div className="community-cover-overlay" />
                 <div className="community-card-badges">
-                  <span className={`badge badge-${trip.status === 'upcoming' ? 'primary' : trip.status === 'ongoing' ? 'success' : 'muted'}`}>{trip.status}</span>
+                  <span className="badge badge-cyan"><Globe2 size={11} /> Community Guide</span>
                 </div>
               </div>
 
               <div className="community-card-body">
                 <div className="community-author">
-                  <img src={trip.userId?.profileImage} className="avatar avatar-sm" alt=""
-                    onError={e => e.target.src = `https://ui-avatars.com/api/?name=${trip.userId?.firstName}&background=1E88E5&color=fff`} />
+                  <div className="author-avatar">
+                    {(post.author?.firstName || post.user?.firstName || 'G')[0]}
+                  </div>
                   <div>
-                    <span className="author-name">{trip.userId?.firstName} {trip.userId?.lastName}</span>
-                    <span className="author-date">{format(new Date(trip.createdAt), 'MMM d, yyyy')}</span>
+                    <span className="author-name">{post.author?.firstName || post.user?.firstName || 'Traveler'} {post.author?.lastName || post.user?.lastName || ''}</span>
+                    <span className="author-date">{post.createdAt ? format(new Date(post.createdAt), 'MMM d, yyyy') : 'Recent'}</span>
                   </div>
                 </div>
 
-                <h3 className="community-trip-name">{trip.tripName}</h3>
-                {trip.description && <p className="community-trip-desc">{trip.description}</p>}
-
-                <div className="community-trip-meta">
-                  {trip.stops?.length > 0 && (
-                    <div className="comm-meta-item">
-                      {trip.stops.slice(0, 3).map((s, j) => (
-                        <span key={j} className="city-chip">{s.city}</span>
-                      ))}
-                      {trip.stops.length > 3 && <span className="city-chip">+{trip.stops.length - 3}</span>}
-                    </div>
-                  )}
-                </div>
+                <h3 className="community-trip-name">{post.title || post.trip?.name || 'Shared itinerary'}</h3>
+                {post.content && <p className="community-trip-desc">{post.content.substring(0, 140)}...</p>}
+                {post.description && <p className="community-trip-desc">{post.description.substring(0, 140)}...</p>}
               </div>
 
               <div className="community-card-footer">
-                <button className="comm-action-btn" onClick={e => handleLike(trip._id, e)}>
-                  <Heart size={15} /> {trip.likes?.length || 0}
-                </button>
-                <button className="comm-action-btn">
-                  <MessageSquare size={15} /> {trip.comments?.length || 0}
-                </button>
                 <span className="comm-action-btn">
-                  Views: {trip.views || 0}
+                  <MessageSquare size={14} /> Read Itinerary
+                </span>
+                <span className="comm-action-btn view-link">
+                  View Guide <ArrowRight size={14} />
                 </span>
               </div>
             </motion.div>
