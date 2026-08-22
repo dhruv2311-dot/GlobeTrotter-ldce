@@ -1,0 +1,33 @@
+import { Router } from 'express';
+import * as controller from '../controllers/trip.controller';
+import { authMiddleware } from '../middlewares/auth.middleware';
+import { validate } from '../middlewares/validate.middleware';
+import { addTripActivitySchema, createDaySchema, createStopSchema, createTripSchema, dayParamsSchema, listTripsSchema, reorderActivitiesSchema, reorderStopsSchema, stopParamsSchema, tripActivityParamsSchema, tripIdSchema, updateDaySchema, updateStopSchema, updateTripActivitySchema, updateTripSchema } from '../validators/trip.validator';
+
+const router = Router();
+router.use(authMiddleware);
+router.post('/', validate(createTripSchema), controller.createTrip);
+router.get('/', validate(listTripsSchema), controller.listTrips);
+router.get('/:id/itinerary', validate(tripIdSchema), controller.itinerary);
+router.patch('/:id/stops/reorder', validate(reorderStopsSchema), controller.reorderStops);
+router.post('/:id/stops', validate(createStopSchema), controller.createStop);
+router.get('/:id/stops', validate(tripIdSchema), controller.listStops);
+router.get('/:id/stops/:stopId', validate(stopParamsSchema), controller.getStop);
+router.patch('/:id/stops/:stopId', validate(updateStopSchema), controller.updateStop);
+router.delete('/:id/stops/:stopId', validate(stopParamsSchema), controller.deleteStop);
+router.post('/:id/days', validate(createDaySchema), controller.createDay);
+router.get('/:id/days', validate(tripIdSchema), controller.listDays);
+router.get('/:id/days/:dayId', validate(dayParamsSchema), controller.getDay);
+router.patch('/:id/days/:dayId', validate(updateDaySchema), controller.updateDay);
+router.delete('/:id/days/:dayId', validate(dayParamsSchema), controller.deleteDay);
+router.post('/:id/days/:dayId/activities', validate(addTripActivitySchema), controller.addActivity);
+router.get('/:id', validate(tripIdSchema), controller.getTrip);
+router.patch('/:id', validate(updateTripSchema), controller.updateTrip);
+router.delete('/:id', validate(tripIdSchema), controller.deleteTrip);
+export default router;
+
+export const tripActivityRouter = Router();
+tripActivityRouter.use(authMiddleware);
+tripActivityRouter.patch('/reorder', validate(reorderActivitiesSchema), controller.reorderActivities);
+tripActivityRouter.patch('/:id', validate(updateTripActivitySchema), controller.updateActivity);
+tripActivityRouter.delete('/:id', validate(tripActivityParamsSchema), controller.deleteActivity);

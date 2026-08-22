@@ -26,11 +26,12 @@ export function validate(schema: RequestSchema | AnyZodObject) {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
       // Detect whether we received a plain Zod object or a { body, query, params } shape
-      if ('body' in schema || 'query' in schema || 'params' in schema) {
-        const s = schema as RequestSchema;
+      const schemaShape = 'shape' in schema ? schema.shape : schema;
+      if ('body' in schemaShape || 'query' in schemaShape || 'params' in schemaShape) {
+        const s = schemaShape as RequestSchema;
         if (s.body) req.body = await s.body.parseAsync(req.body);
-        if (s.query) req.query = await s.query.parseAsync(req.query);
-        if (s.params) req.params = await s.params.parseAsync(req.params);
+        if (s.query) Object.assign(req.query, await s.query.parseAsync(req.query));
+        if (s.params) Object.assign(req.params, await s.params.parseAsync(req.params));
       } else {
         // Treat the schema as a body validator
         req.body = await (schema as AnyZodObject).parseAsync(req.body);
